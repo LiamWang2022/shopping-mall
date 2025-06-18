@@ -1,13 +1,12 @@
 import { Address } from './shared/address'
-
-export type UserRole = 'buyer' | 'seller' | 'admin'
+import { UserRole } from './shared/user-role'
 
 export interface User {
     id: string
     name: string
     email: string
     password: string
-    role: UserRole
+    role: UserRole[]
     phone?: string
 
     //buyer information
