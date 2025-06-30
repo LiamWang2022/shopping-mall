@@ -1,1 +1,0 @@
-export type UserRole = 'buyer' | 'seller' | 'admin'
