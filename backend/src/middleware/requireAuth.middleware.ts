@@ -2,8 +2,6 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { IUser, User } from '../models/user.model';
 import { JwtPayload } from 'jsonwebtoken';
-import { Shop } from '../models/shop.model'
-import { Product } from '../models/product.model'
 
 interface CustomJwtPayload extends JwtPayload {
   id: string
@@ -42,19 +40,4 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     res.status(401).json({ message: 'Token invalid or expired' })
     return
   }
-}
-
-export const findOwnedProduct = async (productId: string, userId: string) => {
-  const shop = await Shop.findOne({ owner: userId }).exec()
-  if (!shop) return null
-  const product = await Product.findOne({ _id: productId, shop: shop._id }).exec()
-  return product
-}
-
-export const getUserIdOrFail = (req: Request, res: Response): string | undefined => {
-  if (!req.user) {
-    res.status(401).json({ message: 'User not logged in' })
-    return
-  }
-  return req.user._id.toString()
 }
