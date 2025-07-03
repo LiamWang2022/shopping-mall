@@ -6,8 +6,11 @@ import { swaggerSpec } from './swagger'
 import connectDB from './config/db'
 import productRouter from './routes/product.route'
 import shopRouter from './routes/shop.route'
+import userRouter from './routes/user.route'
 import './models/shop.model'
 import './models/product.model'
+import './models/user.model'
+import './middleware/requireAuth.middleware'
 
 dotenv.config();
 
@@ -22,6 +25,7 @@ app.get('/', (_req: Request, res: Response) => {
 });
 app.use('/api/products', productRouter)
 app.use('/api/shops', shopRouter)
+app.use('/api/users', userRouter)
 // 全局错误处理
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
