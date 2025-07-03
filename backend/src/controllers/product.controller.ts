@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { Product } from '../models/product.model'
 import { Shop } from '../models/shop.model'
-import { findOwnedProduct, getUserIdOrFail } from '../middleware/requireAuth.middleware'
+import { findOwnedProduct, getUserIdOrFail } from '../utils/auth.helper'
 /** Seller — create a product */
 export const createProduct = async (req: Request, res: Response) => {
   try {
