@@ -7,6 +7,7 @@ import {
   getProductById,
   restoreProduct
 } from '../controllers/product.controller'
+import { requireAuth } from '../middleware/requireAuth.middleware'
 
 const router = Router()
 
@@ -85,7 +86,7 @@ router.get('/:id', getProductById)
  *     responses:
  *       201: { description: Created }
  */
-router.post('/', createProduct) // TODO: add authSeller middleware
+router.post('/', requireAuth, createProduct) // TODO: add authSeller middleware
 
 /**
  * @swagger
@@ -110,7 +111,7 @@ router.post('/', createProduct) // TODO: add authSeller middleware
  *       200: { description: Updated product }
  *       404: { description: Product not found }
  */
-router.patch('/:id', updateProduct) // TODO: add authSeller middleware
+router.patch('/:id', requireAuth, updateProduct)
 
 /**
  * @swagger
@@ -129,7 +130,7 @@ router.patch('/:id', updateProduct) // TODO: add authSeller middleware
  *       200: { description: Product delisted }
  *       404: { description: Product not found }
  */
-router.patch('/:id/delist', delistProduct) // TODO: add authSeller middleware
+router.patch('/:id/delist', requireAuth, delistProduct) // TODO: add authSeller middleware
 
 /**
  * @swagger
@@ -160,5 +161,5 @@ router.patch('/:id/delist', delistProduct) // TODO: add authSeller middleware
  *       404:
  *         description: Product not found
  */
-router.patch('/:id/restore', restoreProduct)
+router.patch('/:id/restore', requireAuth, restoreProduct)
 export default router
