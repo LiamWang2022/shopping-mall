@@ -17,6 +17,7 @@ const UserSchema = new Schema(
 )
 
 export interface IUser extends Document {
+  _id: Types.ObjectId
   email: string
   password: string
   name: string
