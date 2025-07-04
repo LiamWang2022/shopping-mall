@@ -7,6 +7,9 @@ import {
   delistShop,
   restoreShop
 } from "../controllers/shop.controller"
+import { requireAuth } from "../middleware/requireAuth.middleware"
+
+const router = Router()
 
 /**
  * @swagger
@@ -15,14 +18,14 @@ import {
  *   description: Manage and query shops
  */
 
-const router = Router()
-
 /**
  * @swagger
  * /api/shops:
  *   post:
  *     summary: Create a shop
  *     tags: [Shops]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -45,8 +48,10 @@ const router = Router()
  *         description: Shop created successfully
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
  */
-router.post('/', createShop)
+router.post('/', requireAuth, createShop)
 
 /**
  * @swagger
@@ -104,6 +109,8 @@ router.get('/:id', getShopById)
  *   patch:
  *     summary: Update a shop
  *     tags: [Shops]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -133,8 +140,10 @@ router.get('/:id', getShopById)
  *         description: Shop updated
  *       404:
  *         description: Shop not found
+ *       401:
+ *         description: Unauthorized
  */
-router.patch('/:id', updateShop)
+router.patch('/:id', requireAuth, updateShop)
 
 /**
  * @swagger
@@ -142,6 +151,8 @@ router.patch('/:id', updateShop)
  *   patch:
  *     summary: Soft delete (delist) a shop
  *     tags: [Shops]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -153,8 +164,10 @@ router.patch('/:id', updateShop)
  *         description: Shop delisted
  *       404:
  *         description: Shop not found
+ *       401:
+ *         description: Unauthorized
  */
-router.patch('/:id/delist', delistShop)
+router.patch('/:id/delist', requireAuth, delistShop)
 
 /**
  * @swagger
@@ -162,6 +175,8 @@ router.patch('/:id/delist', delistShop)
  *   patch:
  *     summary: Restore a previously delisted shop
  *     tags: [Shops]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -184,7 +199,9 @@ router.patch('/:id/delist', delistShop)
  *                   $ref: '#/components/schemas/Shop'
  *       404:
  *         description: Shop not found
+ *       401:
+ *         description: Unauthorized
  */
-router.patch('/:id/restore', restoreShop)
+router.patch('/:id/restore', requireAuth, restoreShop)
 
 export default router
