@@ -4,8 +4,7 @@ import { Product } from '../models/product.model'
 
 export const getUserIdOrFail = (req: Request, res: Response): string | undefined => {
   if (!req.user) {
-    res.status(401).json({ message: 'User not logged in' })
-    return
+    throw new Error('User not logged in')
   }
   return req.user._id.toString()
 }

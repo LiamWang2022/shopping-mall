@@ -5,7 +5,7 @@ import { findOwnedProduct, getUserIdOrFail } from '../utils/auth.helper'
 /** Seller — create a product */
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdOrFail(req, res)
+    const userId = getUserIdOrFail(req)
     if (!userId) return
 
     const shop = await Shop.findOne({ owner: userId }).exec()
@@ -32,7 +32,7 @@ export const createProduct = async (req: Request, res: Response) => {
 /** Seller — update a product */
 export const updateProduct = async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdOrFail(req, res)
+    const userId = getUserIdOrFail(req)
     if (!userId) return
 
     const { shop, _id, isActive, ...editable } = req.body
@@ -59,7 +59,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 /** Seller — delist a product */
 export const delistProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = getUserIdOrFail(req, res)
+    const userId = getUserIdOrFail(req)
     if (!userId) return
 
     const owned = await findOwnedProduct(req.params.id, userId)
@@ -131,7 +131,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 /** Seller — restore a delisted product */
 export const restoreProduct = async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdOrFail(req, res)
+    const userId = getUserIdOrFail(req)
     if (!userId) return
 
     const owned = await findOwnedProduct(req.params.id, userId)

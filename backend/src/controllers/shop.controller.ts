@@ -8,7 +8,7 @@ import { Category } from "../models/productCategory.model";
 import { findSourceMap } from "module";
 
 const getMyShopOrFail = async (req: Request, res: Response) => {
-  const userId = getUserIdOrFail(req, res)
+  const userId = getUserIdOrFail(req)
   if (!userId) {
     throw { status: 404, error: 'User not found' }
   }
@@ -65,7 +65,7 @@ export const getShopById = async (req: Request, res: Response) => {
 // Private
 export const createShop = async (req: Request, res: Response) => {
   try{
-    const userId = getUserIdOrFail(req,res)
+    const userId = getUserIdOrFail(req)
     const user = await User.findById(userId)
     if(!user){
       res.status(404).json({ error: 'User not found' })

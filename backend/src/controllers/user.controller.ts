@@ -143,7 +143,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 
 export const becomeSeller = async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdOrFail(req,res)
+    const userId = getUserIdOrFail(req)
     const user = await User.findById(userId)
 
     if (!user) {
