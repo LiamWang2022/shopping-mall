@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { Shop } from '../models/shop.model'
 import { Product } from '../models/product.model'
 
-export const getUserIdOrFail = (req: Request, res: Response): string | undefined => {
+export const getUserIdOrFail = (req: Request): string | undefined => {
   if (!req.user) {
     throw new Error('User not logged in')
   }
