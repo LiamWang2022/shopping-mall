@@ -3,7 +3,8 @@ import {
   registerUser,
   loginUser,
   getProfile,
-  updateProfile
+  updateProfile,
+  becomeSeller
 } from "../controllers/user.controller"
 import { requireAuth } from "../middleware/requireAuth.middleware"
 
@@ -121,5 +122,21 @@ router.post('/profile', requireAuth, getProfile)
  *         description: User not found
  */
 router.patch('/update', requireAuth, updateProfile)
+
+/**
+ * @swagger
+ * /api/users/become-seller:
+ *   post:
+ *     summary: Promote user to seller role
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User is now a seller
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/become-seller', requireAuth, becomeSeller)
 
 export default router

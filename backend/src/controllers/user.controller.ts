@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { IUser, User } from "../models/user.model";
 import { error } from "console";
 import jwt, {SignOptions} from "jsonwebtoken";
+import { getUserIdOrFail } from '../utils/auth.helper'
+
 export const registerUser = async (req: Request, res: Response) => {
   try{
     const {email, password, name} = req.body
@@ -135,6 +137,32 @@ export const updateProfile = async (req: Request, res: Response) => {
   } catch (err) {
     console.error('[Update Profile Error]', err)
     res.status(500).json({ message: 'Sever error' })
+    return
+  }
+}
+
+export const becomeSeller = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdOrFail(req,res)
+    const user = await User.findById(userId)
+
+    if (!user) {
+      res.status(404).json({ success: false, error: 'User not found' })
+      return
+    }
+
+    if (user.roles.includes('seller')) {
+      res.json({ success: true, message: 'You are already a seller' })
+      return
+    }
+
+    user.roles.push('seller')
+    await user.save()
+
+    res.json({ success: true, message: 'You are now a seller', data: user })
+    return 
+  }catch(err) {
+    res.status(500).json({ success: false, error: 'Failed to become seller' })
     return
   }
 }
