@@ -5,15 +5,7 @@ import { findOwnedProduct, getUserIdOrFail } from '../utils/auth.helper'
 /** Seller — create a product */
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdOrFail(req)
-    if (!userId) return
-
-    const shop = await Shop.findOne({ owner: userId }).exec()
-    if (!shop) {
-      res.status(403).json({ error: 'You do not have a shop' })
-      return
-    }
-
+    const shop = req.shop!
     const product = await Product.create({
       ...req.body,
       shop: shop._id
@@ -32,22 +24,20 @@ export const createProduct = async (req: Request, res: Response) => {
 /** Seller — update a product */
 export const updateProduct = async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdOrFail(req)
-    if (!userId) return
-
-    const { shop, _id, isActive, ...editable } = req.body
-
-    const owned = await findOwnedProduct(req.params.id, userId)
-    if (!owned) {
-      res.status(403).json({ error: 'Unauthorized to modify this product' })
-      return
-    }
+    const shop = req.shop!
+    // Prevent sensitive fields from being updated (e.g. _id, shop)
+    const { _id, isActive, shop: shopFromBody,...editable } = req.body
 
     const updated = await Product.findByIdAndUpdate(
-      req.params.id,
+      { _id: req.params.id, shop: shop._id },
       editable,
       { new: true, runValidators: true }
     ).exec()
+    
+    if (!updated) {
+      res.status(403).json({ error: 'Unauthorized to modify this product' })
+      return
+    }
 
     res.json(updated)
   } catch (err) {
@@ -59,20 +49,17 @@ export const updateProduct = async (req: Request, res: Response) => {
 /** Seller — delist a product */
 export const delistProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = getUserIdOrFail(req)
-    if (!userId) return
-
-    const owned = await findOwnedProduct(req.params.id, userId)
-    if (!owned) {
-      res.status(403).json({ error: 'Unauthorized to modify this product' })
-      return
-    }
+    const shop = req.shop!
 
     const updated = await Product.findByIdAndUpdate(
-      req.params.id,
+      { _id: req.params.id, shop: shop._id },
       { isActive: false },
       { new: true }
     ).exec()
+    if (!updated) {
+      res.status(403).json({ error: 'Unauthorized to delist this product' })
+      return
+    }
 
     res.json({ message: 'Product delisted', product: updated })
   } catch (err) {
@@ -131,20 +118,18 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 /** Seller — restore a delisted product */
 export const restoreProduct = async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdOrFail(req)
-    if (!userId) return
-
-    const owned = await findOwnedProduct(req.params.id, userId)
-    if (!owned) {
-      res.status(403).json({ error: 'Unauthorized to restore this product' })
-      return
-    }
+    const shop = req.shop!
 
     const updated = await Product.findByIdAndUpdate(
-      req.params.id,
+      { _id: req.params.id, shop: shop._id },
       { isActive: true },
       { new: true }
     ).exec()
+    if (!updated) {
+      res.status(403).json({ error: 'Unauthorized to delist this product' })
+      return
+    }
+
 
     res.json({ message: 'Product restored', product: updated })
   } catch (err) {
