@@ -1,25 +1,8 @@
 import { Request, Response } from "express";
 import { Shop } from "../models/shop.model";
-import { Product } from "../models/product.model";
 import { User } from "../models/user.model";
-import { error } from "console";
-import { getUserIdOrFail, findOwnedShop } from "../utils/auth.helper";
-import { Category } from "../models/productCategory.model";
-import { findSourceMap } from "module";
+import { getUserIdOrFail} from "../utils/auth.helper";
 
-const getMyShopOrFail = async (req: Request, res: Response) => {
-  const userId = getUserIdOrFail(req)
-  if (!userId) {
-    throw { status: 404, error: 'User not found' }
-  }
-
-  const shop = await findOwnedShop(req.params.id, userId)
-  if (!shop) {
-    throw { status: 404, error: 'You can only access your own shop' }
-  }
-
-  return shop
-}
 
 // Public
 export const listShops = async (req: Request, res: Response) => {
@@ -87,7 +70,7 @@ export const createShop = async (req: Request, res: Response) => {
 
 export const updateShop = async (req: Request, res: Response) => {
   try{
-    const shop = await getMyShopOrFail(req, res)
+    const shop = req.shop!
     const {_id, isActive, ...editable} = req.body
     Object.assign(shop, editable)
     await shop.save()
@@ -102,7 +85,7 @@ export const updateShop = async (req: Request, res: Response) => {
 
 export const delistShop = async(req: Request, res: Response) => {
   try{
-    const shop = await getMyShopOrFail(req,res)
+    const shop = req.shop!
     shop.isActive = false
     await shop.save()
 
@@ -116,7 +99,7 @@ export const delistShop = async(req: Request, res: Response) => {
 
 export const restoreShop = async(req: Request, res: Response) => {
   try{
-    const shop = await getMyShopOrFail(req, res)
+    const shop = req.shop!
     shop.isActive = true
     await shop.save()
     

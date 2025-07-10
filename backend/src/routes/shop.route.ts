@@ -8,6 +8,7 @@ import {
   restoreShop
 } from "../controllers/shop.controller"
 import { requireAuth } from "../middleware/requireAuth.middleware"
+import { requireShopAccess } from '../middleware/requireShopAccess.middleware'
 
 const router = Router()
 
@@ -143,7 +144,7 @@ router.get('/:id', getShopById)
  *       401:
  *         description: Unauthorized
  */
-router.patch('/:id', requireAuth, updateShop)
+router.patch('/:id', requireAuth, requireShopAccess, updateShop)
 
 /**
  * @swagger
@@ -167,7 +168,7 @@ router.patch('/:id', requireAuth, updateShop)
  *       401:
  *         description: Unauthorized
  */
-router.patch('/:id/delist', requireAuth, delistShop)
+router.patch('/:id/delist', requireAuth, requireShopAccess,delistShop)
 
 /**
  * @swagger
@@ -202,6 +203,6 @@ router.patch('/:id/delist', requireAuth, delistShop)
  *       401:
  *         description: Unauthorized
  */
-router.patch('/:id/restore', requireAuth, restoreShop)
+router.patch('/:id/restore', requireAuth, requireShopAccess, restoreShop)
 
 export default router
