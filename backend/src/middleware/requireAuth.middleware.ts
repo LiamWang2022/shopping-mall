@@ -8,11 +8,12 @@ interface CustomJwtPayload extends JwtPayload {
   activeRole: string
 }
 
-declare module 'express' {
-  interface Request {
-    user?: IUser
-  }
-}
+// migrated logic to types/express.ts
+// declare module 'express' {
+//   interface Request {
+//     user?: IUser
+//   }
+// }
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization
