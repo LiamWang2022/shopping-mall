@@ -110,3 +110,19 @@ export const restoreShop = async(req: Request, res: Response) => {
     return
   }
 }
+
+export const getOwnedShops = async(req: Request, res: Response) => {
+  try{
+    const userId = getUserIdOrFail(req)
+    const shop = await Shop.find({owner: userId})
+    res.status(200).json({
+      message:
+        shop.length === 0 ? 'Get shop list successful' : 'Get shop list successful',
+      shop
+    })
+    return
+  }catch(err){
+    res.status(500).json({error: 'Intenal Sever Error'})
+    return
+  }
+}

@@ -5,7 +5,8 @@ import {
   getShopById,
   updateShop,
   delistShop,
-  restoreShop
+  restoreShop,
+  getOwnedShops
 } from "../controllers/shop.controller"
 import { requireAuth } from "../middleware/requireAuth.middleware"
 import { requireShopAccess } from '../middleware/requireShopAccess.middleware'
@@ -204,5 +205,33 @@ router.patch('/:id/delist', requireAuth, requireShopAccess,delistShop)
  *         description: Unauthorized
  */
 router.patch('/:id/restore', requireAuth, requireShopAccess, restoreShop)
-
+/**
+ * @swagger
+ * /api/shops/my:
+ *   get:
+ *     summary: Get all shops owned by the current user
+ *     tags: [Shops]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of owned shops
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Get shop list successful
+ *                 shops:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Shop'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get('/my', requireAuth, getOwnedShops)
 export default router
