@@ -3,7 +3,7 @@ import { Schema, model, Document, Types } from 'mongoose'
 const OrderItemSchema = new Schema({
   product:  { type: Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true, min: 1 },
-  price:    { type: Number, required: true }            // 下单瞬时价
+  price:    { type: Number, required: true }
 })
 
 const OrderSchema = new Schema(
