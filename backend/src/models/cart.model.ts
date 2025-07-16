@@ -7,7 +7,7 @@ const CartItemSchema = new Schema({
 
 const CartSchema = new Schema(
   {
-    user:  { type: Types.ObjectId, ref: 'User', required: true, unique: true },
+    buyer:  { type: Types.ObjectId, ref: 'User', required: true, unique: true },
     items: { type: [CartItemSchema], default: [] }
   },
   { timestamps: true }
@@ -19,7 +19,7 @@ export interface ICartItem {
 }
 
 export interface ICart extends Document {
-  user: Types.ObjectId
+  buyer: Types.ObjectId
   items: ICartItem[]
 }
 
