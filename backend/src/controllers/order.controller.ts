@@ -13,6 +13,13 @@ interface CreateOrderRequestBody {
   }[]
   address: string
 }
+interface OrderFromCartBody {
+  items: {
+    productId: string
+    quantity: number
+  }[]
+  address: string
+}
 // Buyer function
 //Create Order
 export const createOrder = async(req: Request, res: Response) => {
@@ -234,5 +241,78 @@ export const getOrderById = async (req: Request, res: Response) => {
     }
 
     res.status(500).json({ error: 'Internal server error' })
+    return
+  }
+}
+
+export const createOrderFromCart = async(req: Request, res: Response) => {
+  try{
+    const userId = getUserIdOrFail(req)
+    const { items, address } = req.body as OrderFromCartBody
+    
+    if (!Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ error: 'Missing items' })
+      return
+    }
+    if (!address){
+      res.status(400).json({ error: 'Missing address' })
+      return
+    }
+    
+    const productMap = new Map()
+    for(const{ productId } of items) {
+      const product = await Product.findById(productId)
+      if(!product || !product.isActive){
+        res.status(400).json({ error: 'Product not found or not active' })
+        return
+      }
+      productMap.set(productId, product)
+    }
+
+    const ordersByShop = new Map<string, { product: string, quantity: number, price: number }[]>()
+    for( const{ productId, quantity} of items ){
+      const product = productMap.get(productId)
+      if(quantity <=0 || quantity > product.stock_count){
+        res.status(400).json({ error: 'Invalid quantity' })
+        return
+      }
+      product.stock_count -= quantity
+      await product.save()
+
+      const shopId = product.shop.toString()
+      if(!ordersByShop.has(shopId)){
+        ordersByShop.set(shopId,[])
+      }
+
+      ordersByShop.get(shopId)!.push({
+        product: product._id,
+        quantity: quantity,
+        price: product.price
+      })
+    } 
+    const createdOrders = []
+
+    for (const [shopId, orderItems] of ordersByShop.entries()) {
+      const total = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+      const newOrder = await Order.create({
+        buyer: userId,
+        shop: shopId,
+        items: orderItems,
+        total,
+        status: 'pending',
+        shipping_address: address
+      })
+
+      createdOrders.push(newOrder)
+    }
+    res.status(201).json({
+      message: 'Orders created from cart',
+      orders: createdOrders
+    })
+    return
+  }catch(err){
+    res.status(500).json({ error: 'Internal server error' })
+    return
   }
 }
