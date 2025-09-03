@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
+import { setupListeners } from '@reduxjs/toolkit/query'
 import { productApi } from './services/productApi'
 import { cartApi } from './services/cartApi'
 import { authApi } from './services/authApi'
@@ -22,11 +23,11 @@ export const store = configureStore({
       productApi.middleware,
       cartApi.middleware,
       authApi.middleware,
-      orderApi.middleware,                     
+      orderApi.middleware,
       addressApi.middleware,
-      userApi.middleware,                        
+      userApi.middleware, 
     ),
 })
-
+setupListeners(store.dispatch)
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
