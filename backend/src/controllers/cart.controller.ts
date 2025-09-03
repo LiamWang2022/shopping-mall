@@ -3,6 +3,19 @@ import { Cart } from "../models/cart.model";
 import { Product } from "../models/product.model";
 import { getUserIdOrFail } from "../utils/auth.helper";
 
+const toCartDTO = (cart: any) => ({
+  items: cart.items.map((it: any) => {
+    const p = it.product
+    return {
+      productId: p._id,
+      display_name: p.display_name,
+      price: p.price,
+      images: p.images,
+      quantity: it.quantity
+    }
+  })
+})
+
 export const addToCart = async(req: Request, res: Response) => {
   try{
     const userId = getUserIdOrFail(req)
@@ -20,7 +33,7 @@ export const addToCart = async(req: Request, res: Response) => {
     if(!cart){
       cart = new Cart({
         buyer: userId,
-        items: [{ productId, quantity }]
+        items: [{ product: productId, quantity }]
       })
     }else{
       const existingItem =cart.items.find(item => item.product.equals(productId))
@@ -31,13 +44,15 @@ export const addToCart = async(req: Request, res: Response) => {
       }
     }
     await cart.save()
+    await cart.populate('items.product', 'display_name price images')
+
     res.status(200).json({
-      message: 'Item added to cart',
-      cart
+      // message: 'Item added to cart',
+      ...toCartDTO(cart),
     })
     return
   }catch(err){
-    res.status(500).json({ error: 'Intenal Server Error'})
+    res.status(500).json({ error: 'Internal server error'})
     return
   }
 }
@@ -51,10 +66,10 @@ export const getCart = async(req: Request, res: Response) => {
       res.status(200).json({ items:[] })
       return
     }
-    res.status(200).json({ cart })
+    res.status(200).json(toCartDTO(cart))
     return
   }catch(error){
-    res.status(500).json({ error: "Internal sever error" })
+    res.status(500).json({ error: "Internal server error" })
     return
   }
 }
@@ -75,10 +90,12 @@ export const deleteItemFromCart = async(req: Request, res: Response) => {
       return
     }
     await cart.save()
-    res.status(200).json({ message: 'Item removed from cart', cart })
+    await cart.populate('items.product', 'display_name price images')
+
+    res.status(200).json(toCartDTO(cart))
     return
   }catch(err){
-    res.status(500).json({ error: "Internal sever error" })
+    res.status(500).json({ error: "Internal server error" })
     return
   }
 }
@@ -110,8 +127,8 @@ export const updateCartItem = async(req: Request, res: Response) => {
         buyer: userId,
         items: [{ product: productId, quantity }]
       })
-
-      res.status(200).json({ message: 'Cart created with item', cart })
+      await cart.populate('items.product', 'display_name price images')
+      res.status(200).json(toCartDTO(cart))
       return
     }
     const existingItem = cart.items.find(item => item.product.equals(productId))
@@ -129,7 +146,9 @@ export const updateCartItem = async(req: Request, res: Response) => {
       cart.items.push({ product: productId, quantity })
       }
     await cart.save()
-    res.status(200).json({ message: 'Cart updated', cart })
+    await cart.populate('items.product', 'display_name price images')
+
+    res.status(200).json(toCartDTO(cart))
     return
   }catch(err){
     res.status(500).json({ error: 'Internal server error' })
