@@ -32,7 +32,7 @@ const router = Router()
  *       - in: query
  *         name: q
  *         schema: { type: string }
- *         description: Fuzzy search in display_name
+ *         description: Fuzzy search in display_name (regex-safe)
  *       - in: query
  *         name: category
  *         schema: { type: string }
@@ -45,9 +45,28 @@ const router = Router()
  *       - in: query
  *         name: maxPrice
  *         schema: { type: number }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, minimum: 1, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+ *       - in: query
+ *         name: sort
+ *         schema: { type: string, enum: ["price","-price","createdAt","-createdAt"] }
  *     responses:
  *       200:
- *         description: An array of active products
+ *         description: Paged list of active products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductListResponse'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/', listProducts)
 
@@ -63,8 +82,24 @@ router.get('/', listProducts)
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200: { description: Success }
- *       404: { description: Product not found }
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductDTO'
+ *       400:
+ *         description: Invalid ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/:id', getProductById)
 
@@ -83,11 +118,24 @@ router.get('/:id', getProductById)
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             $ref: '#/components/schemas/ProductInput'
  *     responses:
- *       201: { description: Created }
+ *       201:
+ *         description: Created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductDTO'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401: { description: Unauthorized }
+ *       403: { description: Forbidden (no shop access) }
  */
-router.post('/', requireAuth, requireShopAccess,createProduct) // TODO: add authSeller middleware
+router.post('/', requireAuth, requireShopAccess, createProduct)
 
 /**
  * @swagger
@@ -107,12 +155,27 @@ router.post('/', requireAuth, requireShopAccess,createProduct) // TODO: add auth
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             allOf:
+ *               - $ref: '#/components/schemas/ProductInput'
+ *             required: []  # allow partial updates
  *     responses:
- *       200: { description: Updated product }
+ *       200:
+ *         description: Updated product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductDTO'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401: { description: Unauthorized }
+ *       403: { description: Forbidden }
  *       404: { description: Product not found }
  */
-router.patch('/:id', requireAuth, requireShopAccess,updateProduct)
+router.patch('/:id', requireAuth, requireShopAccess, updateProduct)
 
 /**
  * @swagger
@@ -128,17 +191,25 @@ router.patch('/:id', requireAuth, requireShopAccess,updateProduct)
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200: { description: Product delisted }
+ *       200:
+ *         description: Product delisted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductDTO'
+ *       401: { description: Unauthorized }
+ *       403: { description: Forbidden }
  *       404: { description: Product not found }
  */
-router.patch('/:id/delist', requireAuth, requireShopAccess, delistProduct) // TODO: add authSeller middleware
-
+router.patch('/:id/delist', requireAuth, requireShopAccess, delistProduct)
 /**
  * @swagger
  * /api/products/{id}/restore:
  *   patch:
  *     summary: Restore a previously delisted product
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -152,15 +223,11 @@ router.patch('/:id/delist', requireAuth, requireShopAccess, delistProduct) // TO
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Product restored
- *                 product:
- *                   $ref: '#/components/schemas/Product'
- *       404:
- *         description: Product not found
+ *               $ref: '#/components/schemas/ProductDTO'
+ *       401: { description: Unauthorized }
+ *       403: { description: Forbidden }
+ *       404: { description: Product not found }
  */
 router.patch('/:id/restore', requireAuth, requireShopAccess, restoreProduct)
+
 export default router
